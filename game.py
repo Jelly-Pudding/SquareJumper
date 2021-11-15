@@ -15,7 +15,7 @@ random_list_of_y_coords = random.sample(range(0, 500, 20), 5)
 pygame.init()
 screen = pygame.display.set_mode((500, 500))
 pygame.font.init()
-myfont = pygame.font.SysFont("timesnewroman", 14)
+myfont = pygame.font.SysFont("arial", 14)
 the_square = pygame.Rect(10, 240, 10, 10)
 enemy_square_1 = pygame.Rect(490, random_list_of_y_coords[0], 10, 10)
 enemy_square_2 = pygame.Rect(490, random_list_of_y_coords[1], 10, 10)
@@ -47,9 +47,10 @@ def get_input_for_neat(*args):
     return input_list
 
 def eval_genomes(genomes, config):
+    printed_fitness = 0
     global enemy_square_1, enemy_square_2, enemy_square_3, enemy_square_4, enemy_square_5, the_square
     the_square = pygame.Rect(10, 240, 10, 10)
-    random_list_of_y_coords = random.sample(range(0, 500, 20), 5)
+    random_list_of_y_coords = random.sample(range(0, 500, 10), 5)
     enemy_square_1 = pygame.Rect(490, random_list_of_y_coords[0], 10, 10)
     enemy_square_2 = pygame.Rect(490, random_list_of_y_coords[1], 10, 10)
     enemy_square_3 = pygame.Rect(490, random_list_of_y_coords[2], 10, 10)
@@ -85,14 +86,16 @@ def eval_genomes(genomes, config):
                 network_list.pop(idx)
                 continue
             # Forces it to play within the screen
-            if square[1] == 0 or square[1] == 500:
+            if square[1] <= 0 or square[1] >= 500:
                 genome.fitness -= 100.0
                 the_square_list.pop(idx)
                 genome_list.pop(idx)
                 network_list.pop(idx)
+        if the_square_list == []:
+            break
         if enemy_square_1[0] == -20:
             # Red squares reach the other end of the screen, so they all get reset
-            random_list_of_y_coords = random.sample(range(0, 500, 20), 5)
+            random_list_of_y_coords = random.sample(range(0, 500, 10), 5)
             enemy_square_1 = pygame.Rect(490, random_list_of_y_coords[0], 10, 10)
             enemy_square_2 = pygame.Rect(490, random_list_of_y_coords[1], 10, 10)
             enemy_square_3 = pygame.Rect(490, random_list_of_y_coords[2], 10, 10)
@@ -101,29 +104,24 @@ def eval_genomes(genomes, config):
             # It must have survived another round, so the network gets rewarded
             for idx, square in enumerate(the_square_list):
                 genome_list[idx].fitness += 1.0
-                neural_net_input = get_input_for_neat(square, enemy_square_1, enemy_square_2, enemy_square_3, enemy_square_4, enemy_square_5)
-                output = network_list[idx].activate(neural_net_input)
-                max_value = max(output)
-                max_index = output.index(max_value)
-                if max_index == 0:
-                    the_square_list[idx] = pygame.Rect.move(square, 0, -5)
-                elif max_index == 1:
-                    pass
-                elif max_index == 2:
-                    the_square_list[idx] = pygame.Rect.move(square, 0, 5)
-        if the_square_list == []:
-            break
+                printed_fitness += 1
+        neural_net_input = get_input_for_neat(square, enemy_square_1, enemy_square_2, enemy_square_3, enemy_square_4, enemy_square_5)
+        for idx, square in enumerate(the_square_list):
+            output = network_list[idx].activate(neural_net_input)
+            max_value = max(output)
+            max_index = output.index(max_value)
+            if max_index == 0:
+                the_square_list[idx] = pygame.Rect.move(square, 0, -5)
+            elif max_index == 1:
+                pass
+            elif max_index == 2:
+                the_square_list[idx] = pygame.Rect.move(square, 0, 5)
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     pygame.quit()
                     sys.exit()
-                if event.key == pygame.K_w:
-                    #moves the square up
-                    the_square = pygame.Rect.move(the_square, 0, -5)
-                if event.key == pygame.K_s:
-                    #moves the square down
-                    the_square = pygame.Rect.move(the_square, 0, 5)
+
 def run(config_file):
     # Load configuration.
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
