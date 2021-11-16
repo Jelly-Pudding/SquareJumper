@@ -22,6 +22,10 @@ enemy_square_2 = pygame.Rect(490, random_list_of_y_coords[1], 10, 10)
 enemy_square_3 = pygame.Rect(490, random_list_of_y_coords[2], 10, 10)
 enemy_square_4 = pygame.Rect(490, random_list_of_y_coords[3], 10, 10)
 enemy_square_5 = pygame.Rect(490, random_list_of_y_coords[4], 10, 10)
+force_to_move_square1 = pygame.Rect(490, 240, 10, 10)
+force_to_move_square2 = pygame.Rect(490, 230, 10, 10)
+force_to_move_square3 = pygame.Rect(490, 250, 10, 10)
+
 pygame.display.set_caption("Square Mover")
 clock = pygame.time.Clock()
 
@@ -34,6 +38,9 @@ def displayer(squarelist):
     pygame.draw.rect(screen, (255, 0, 0), enemy_square_3)
     pygame.draw.rect(screen, (255, 0, 0), enemy_square_4)
     pygame.draw.rect(screen, (255, 0, 0), enemy_square_5)
+    pygame.draw.rect(screen, (255, 0, 0), force_to_move_square1)
+    pygame.draw.rect(screen, (255, 0, 0), force_to_move_square2)
+    pygame.draw.rect(screen, (255, 0, 0), force_to_move_square3)
     pygame.display.update()
 
 running = True
@@ -44,18 +51,23 @@ def get_input_for_neat(*args):
     input_list = []
     for square in args:
         input_list.append(square[1])
+        input_list.append(square[1] + 10)
     return input_list
-
+generation = 0
 def eval_genomes(genomes, config):
     printed_fitness = 0
-    global enemy_square_1, enemy_square_2, enemy_square_3, enemy_square_4, enemy_square_5, the_square
+    global force_to_move_square1, force_to_move_square2, force_to_move_square3, generation, enemy_square_1, enemy_square_2, enemy_square_3, enemy_square_4, enemy_square_5, the_square
+    generation += 1
     the_square = pygame.Rect(10, 240, 10, 10)
     random_list_of_y_coords = random.sample(range(0, 500, 10), 5)
     enemy_square_1 = pygame.Rect(490, random_list_of_y_coords[0], 10, 10)
     enemy_square_2 = pygame.Rect(490, random_list_of_y_coords[1], 10, 10)
     enemy_square_3 = pygame.Rect(490, random_list_of_y_coords[2], 10, 10)
     enemy_square_4 = pygame.Rect(490, random_list_of_y_coords[3], 10, 10)
-    enemy_square_5 = pygame.Rect(490, random_list_of_y_coords[4], 10, 10)   
+    enemy_square_5 = pygame.Rect(490, random_list_of_y_coords[4], 10, 10)
+    force_to_move_square1 = pygame.Rect(490, 240, 10, 10)
+    force_to_move_square2 = pygame.Rect(490, 230, 10, 10)
+    force_to_move_square3 = pygame.Rect(490, 250, 10, 10)
     the_square_list = []
     genome_list = []
     network_list = []
@@ -67,19 +79,26 @@ def eval_genomes(genomes, config):
         network_list.append(net)
     running = True
     while running == True:
-        clock.tick(130)        
+        clock.tick(200)        
         displayer(the_square_list)
         screen.fill((0,0,0))
-        still_alive = myfont.render("still alive: " + str(len(the_square_list)), False, (255, 255, 255))
+        still_alive = myfont.render("Still alive: " + str(len(the_square_list)), False, (255, 255, 255))
         screen.blit(still_alive,(5,0))
+        print_fitness = myfont.render("Fitness: " + str(printed_fitness), False, (255, 255, 255))
+        screen.blit(print_fitness,(100,0))
+        generation_num = myfont.render("Generation: " + str(generation), False, (255, 255, 255))
+        screen.blit(generation_num,(200,0))
         enemy_square_1 = pygame.Rect.move(enemy_square_1, -5, 0)  
         enemy_square_2 = pygame.Rect.move(enemy_square_2, -5, 0)
         enemy_square_3 = pygame.Rect.move(enemy_square_3, -5, 0)
         enemy_square_4 = pygame.Rect.move(enemy_square_4, -5, 0)
         enemy_square_5 = pygame.Rect.move(enemy_square_5, -5, 0) 
+        force_to_move_square1 = pygame.Rect.move(force_to_move_square1, -5, 0) 
+        force_to_move_square2 = pygame.Rect.move(force_to_move_square2, -5, 0) 
+        force_to_move_square3 = pygame.Rect.move(force_to_move_square3, -5, 0) 
         # If an enemy square hits our green square, the game ends
         for idx, square in enumerate(the_square_list):
-            if pygame.Rect.colliderect(square, enemy_square_1) == True or pygame.Rect.colliderect(square, enemy_square_2) == True or pygame.Rect.colliderect(square, enemy_square_3) == True or pygame.Rect.colliderect(square, enemy_square_4) == True or pygame.Rect.colliderect(square, enemy_square_5) == True:
+            if pygame.Rect.colliderect(square, force_to_move_square1) == True or pygame.Rect.colliderect(square, force_to_move_square2) == True or pygame.Rect.colliderect(square, force_to_move_square3) == True or pygame.Rect.colliderect(square, enemy_square_1) == True or pygame.Rect.colliderect(square, enemy_square_2) == True or pygame.Rect.colliderect(square, enemy_square_3) == True or pygame.Rect.colliderect(square, enemy_square_4) == True or pygame.Rect.colliderect(square, enemy_square_5) == True:
                 genome_list[idx].fitness -= 100.0
                 the_square_list.pop(idx)
                 genome_list.pop(idx)
@@ -87,7 +106,7 @@ def eval_genomes(genomes, config):
                 continue
             # Forces it to play within the screen
             if square[1] <= 0 or square[1] >= 500:
-                genome.fitness -= 100.0
+                genome_list[idx].fitness -= 100.0
                 the_square_list.pop(idx)
                 genome_list.pop(idx)
                 network_list.pop(idx)
@@ -101,10 +120,13 @@ def eval_genomes(genomes, config):
             enemy_square_3 = pygame.Rect(490, random_list_of_y_coords[2], 10, 10)
             enemy_square_4 = pygame.Rect(490, random_list_of_y_coords[3], 10, 10)
             enemy_square_5 = pygame.Rect(490, random_list_of_y_coords[4], 10, 10)
+            force_to_move_square1 = pygame.Rect(490, 240, 10, 10)
+            force_to_move_square2 = pygame.Rect(490, 230, 10, 10)
+            force_to_move_square3 = pygame.Rect(490, 250, 10, 10)
+            printed_fitness += 1
             # It must have survived another round, so the network gets rewarded
             for idx, square in enumerate(the_square_list):
                 genome_list[idx].fitness += 1.0
-                printed_fitness += 1
         neural_net_input = get_input_for_neat(square, enemy_square_1, enemy_square_2, enemy_square_3, enemy_square_4, enemy_square_5)
         for idx, square in enumerate(the_square_list):
             output = network_list[idx].activate(neural_net_input)
@@ -137,7 +159,7 @@ def run(config_file):
     p.add_reporter(neat.Checkpointer(50))
 
     # Run for up to 300 generations.
-    winner = p.run(eval_genomes, 30)
+    winner = p.run(eval_genomes, 100)
 
     # Display the winning genome.
     # print('\nBest genome:\n{!s}'.format(winner))
