@@ -49,7 +49,7 @@ clock = pygame.time.Clock()
 
 def displayer(squarelist):
     for i, square in enumerate(squarelist):
-        pygame.draw.rect(screen, (0, 255, 0), square)
+        pygame.draw.rect(screen, (0, 255, 0), square["square"])
     #pygame.draw.rect(screen, (0, 255, 0), the_square)
     pygame.draw.rect(screen, (255, 0, 0), enemy_square_1)
     pygame.draw.rect(screen, (255, 0, 0), enemy_square_2)
@@ -121,20 +121,20 @@ def eval_genomes(genomes, config):
     network_list = []
     for genome_id, genome in genomes:
         genome.fitness = 0.0
-        the_square_list.append(the_square)
+        the_square_list.append({"square": the_square, "direction_change": False, "threshold": 50})
         genome_list.append(genome)
         net = neat.nn.FeedForwardNetwork.create(genome, config)
         network_list.append(net)
     running = True
     while running == True:
-        clock.tick(300)        
+        clock.tick(30)        
         screen.fill((0,0,0))
         still_alive = myfont.render("Still alive: " + str(len(the_square_list)), False, (255, 255, 255))
-        screen.blit(still_alive,(5,0))
+        screen.blit(still_alive,(15,0))
         print_fitness = myfont.render("Fitness: " + str(printed_fitness), False, (255, 255, 255))
-        screen.blit(print_fitness,(100,0))
+        screen.blit(print_fitness,(105,0))
         generation_num = myfont.render("Generation: " + str(generation), False, (255, 255, 255))
-        screen.blit(generation_num,(200,0))
+        screen.blit(generation_num,(160,0))
         displayer(the_square_list)
         enemy_square_1 = pygame.Rect.move(enemy_square_1, -5, 0)  
         enemy_square_2 = pygame.Rect.move(enemy_square_2, -5, 0)
@@ -151,7 +151,7 @@ def eval_genomes(genomes, config):
         enemy_square_13 = pygame.Rect.move(enemy_square_13, -5, 0)
         # If an enemy square hits our green square, the game ends
         for i in range(len(the_square_list) -1, -1, -1):
-            square = the_square_list[i]
+            square = the_square_list[i]["square"]
             if pygame.Rect.colliderect(square, enemy_square_1) == True or pygame.Rect.colliderect(square, enemy_square_2) == True or pygame.Rect.colliderect(square, enemy_square_3) == True or pygame.Rect.colliderect(square, enemy_square_4) == True or pygame.Rect.colliderect(square, enemy_square_5) == True or pygame.Rect.colliderect(square, enemy_square_6) == True or pygame.Rect.colliderect(square, enemy_square_7) == True or pygame.Rect.colliderect(square, enemy_square_8) == True or pygame.Rect.colliderect(square, enemy_square_9) == True or pygame.Rect.colliderect(square, enemy_square_10) == True or pygame.Rect.colliderect(square, enemy_square_11) == True or pygame.Rect.colliderect(square, enemy_square_12) == True or pygame.Rect.colliderect(square, enemy_square_13) == True:
                 genome_list[i].fitness -= 100.0
                 the_square_list.pop(i)
@@ -200,41 +200,51 @@ def eval_genomes(genomes, config):
             for idx, square in enumerate(the_square_list):
                 genome_list[idx].fitness += 1.0
         for idx, square in enumerate(the_square_list):
-            change_direction = 0
             y = 0
-            if square[1] <= 230:
-                change_direction = -1
-            if square[1] >= 240:
-                change_direction = 1
+            if the_square_list[idx]["square"][1] == 200 and the_square_list[idx]["threshold"] != 200:
+                the_square_list[idx]["direction_change"] = not the_square_list[idx]["direction_change"]
+                the_square_list[idx]["threshold"] = 200
+            elif the_square_list[idx]["square"][1] == 300 and the_square_list[idx]["threshold"] != 300:
+                the_square_list[idx]["direction_change"] = not the_square_list[idx]["direction_change"]
+                the_square_list[idx]["threshold"] = 300
             try:
                 # If the colour at 490 at the opposite end of the screen from the green square is blue, there's an enemy 
-                if pygame.Surface.get_at(screen, (490, the_square_list[idx][1])) == (0, 0, 255, 255):
+                if pygame.Surface.get_at(screen, (490, the_square_list[idx]["square"][1])) == (0, 0, 255, 255):
+                    if the_square_list[idx]["direction_change"] == True:
+                        y = 1
+                    elif the_square_list[idx]["direction_change"] == False:
+                        y = -1
                     #countyep += 1
                     #print("Yep!" + str(countyep))
                     #print("\n")
-                    y = 1
                 # Checks nine pixels down because the green square's bottom can sometimes touch the top of an enemy square
-                if pygame.Surface.get_at(screen, (490, the_square_list[idx][1]+9)) == (0, 0, 255, 255):
-                    #countyep += 1
-                    #print("ADDED 9!" + str(countyep))
-                    #print("\n")
-                    y = 1
-            # There's an Index Error if the green square goes to the bottom of the board. This is not an ideal place to be anyway,
-            # so the input assumes there is an enemy at the other end 
+                elif pygame.Surface.get_at(screen, (490, the_square_list[idx]["square"][1]+9)) == (0, 0, 255, 255):
+                    if the_square_list[idx]["direction_change"] == True:
+                        y = 1
+                    elif the_square_list[idx]["direction_change"] == False:
+                        y = -1
+            # There's an Index Error if the green square goes to the bottom of the board.
             except IndexError:
                 #print("Out of range (bottom of screen) = True!")    
-                y = 1      
-            output = network_list[idx].activate((change_direction, y))
+                pass
+            if y == 1:
+
+                print("PLUS ONE " + str(y))
+                print(the_square_list[idx]["square"])
+            if y == -1:
+                print("NEGGGATTTTIVE ONE" + str(y))
+                print(the_square_list[idx]["square"])
+            output = network_list[idx].activate(([y]))
             #print(output)
             max_value = max(output)
             max_index = output.index(max_value)
             #print(max_index)
             if max_index == 0:
-                the_square_list[idx] = pygame.Rect.move(square, 0, -5)
+                the_square_list[idx]["square"] = pygame.Rect.move(square["square"], 0, -5)
             elif max_index == 1:
                 pass
             elif max_index == 2:
-                the_square_list[idx] = pygame.Rect.move(square, 0, 5)
+                the_square_list[idx]["square"] = pygame.Rect.move(square["square"], 0, 5)
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
@@ -256,7 +266,7 @@ def run(config_file):
     p.add_reporter(neat.Checkpointer(60))
 
     # Run for up to 300 generations.
-    winner = p.run(eval_genomes, 300)
+    winner = p.run(eval_genomes, 100)
 
     # Display the winning genome.
     # print('\nBest genome:\n{!s}'.format(winner))
