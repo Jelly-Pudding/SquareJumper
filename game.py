@@ -44,16 +44,9 @@ def displayer(squarelist):
     pygame.display.update()
 
 running = True
-
 count = 0
+generation = -1
 
-def get_input_for_neat(*args):
-    input_list = []
-    for square in args:
-        input_list.append(square[1])
-        input_list.append(square[1] + 10)
-    return input_list
-generation = 0
 def eval_genomes(genomes, config):
     printed_fitness = 0
     global force_to_move_square1, force_to_move_square2, force_to_move_square3, generation, enemy_square_1, enemy_square_2, enemy_square_3, enemy_square_4, enemy_square_5, the_square
@@ -127,11 +120,12 @@ def eval_genomes(genomes, config):
             # It must have survived another round, so the network gets rewarded
             for idx, square in enumerate(the_square_list):
                 genome_list[idx].fitness += 1.0
-        neural_net_input = get_input_for_neat(square, enemy_square_1, enemy_square_2, enemy_square_3, enemy_square_4, enemy_square_5)
         for idx, square in enumerate(the_square_list):
-            output = network_list[idx].activate(neural_net_input)
+            output = network_list[idx].activate((the_square_list[idx][1], abs(the_square_list[idx][1] - enemy_square_1[1]), abs(the_square_list[idx][1] - enemy_square_2[1]), abs(the_square_list[idx][1] - enemy_square_3[1]), abs(the_square_list[idx][1] - enemy_square_4[1]), abs(the_square_list[idx][1] - enemy_square_5[1])))
+            #print(output)
             max_value = max(output)
             max_index = output.index(max_value)
+            #print(max_index)
             if max_index == 0:
                 the_square_list[idx] = pygame.Rect.move(square, 0, -5)
             elif max_index == 1:
@@ -159,7 +153,7 @@ def run(config_file):
     p.add_reporter(neat.Checkpointer(50))
 
     # Run for up to 300 generations.
-    winner = p.run(eval_genomes, 100)
+    winner = p.run(eval_genomes, 500)
 
     # Display the winning genome.
     # print('\nBest genome:\n{!s}'.format(winner))
