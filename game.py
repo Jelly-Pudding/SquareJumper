@@ -10,7 +10,7 @@ config_path = os.path.join(local_dir, 'config_file_for_neat.txt')
 
 #print(config_path)
 
-random_list_of_y_coords = random.sample(range(0, 500, 20), 10)
+random_list_of_y_coords = random.sample(range(0, 500, 20), 13)
 
 pygame.init()
 screen = pygame.display.set_mode((500, 500))
@@ -27,6 +27,9 @@ enemy_square_7 = pygame.Rect(480, random_list_of_y_coords[6], 10, 10)
 enemy_square_8 = pygame.Rect(480, random_list_of_y_coords[7], 10, 10)
 enemy_square_9 = pygame.Rect(480, random_list_of_y_coords[8], 10, 10)
 enemy_square_10 = pygame.Rect(480, random_list_of_y_coords[9], 10, 10)
+enemy_square_11 = pygame.Rect(480, random_list_of_y_coords[10], 10, 10)
+enemy_square_12 = pygame.Rect(480, random_list_of_y_coords[11], 10, 10)
+enemy_square_13 = pygame.Rect(480, random_list_of_y_coords[12], 10, 10)
 shooty_square_1 = pygame.Rect(490, random_list_of_y_coords[0], 10, 10)
 shooty_square_2 = pygame.Rect(490, random_list_of_y_coords[1], 10, 10)
 shooty_square_3 = pygame.Rect(490, random_list_of_y_coords[2], 10, 10)
@@ -37,6 +40,9 @@ shooty_square_7 = pygame.Rect(490, random_list_of_y_coords[6], 10, 10)
 shooty_square_8 = pygame.Rect(490, random_list_of_y_coords[7], 10, 10)
 shooty_square_9 = pygame.Rect(490, random_list_of_y_coords[8], 10, 10)
 shooty_square_10 = pygame.Rect(490, random_list_of_y_coords[9], 10, 10)
+shooty_square_11 = pygame.Rect(490, random_list_of_y_coords[10], 10, 10)
+shooty_square_12 = pygame.Rect(490, random_list_of_y_coords[11], 10, 10)
+shooty_square_13 = pygame.Rect(490, random_list_of_y_coords[12], 10, 10)
 
 pygame.display.set_caption("Square Mover")
 clock = pygame.time.Clock()
@@ -55,6 +61,9 @@ def displayer(squarelist):
     pygame.draw.rect(screen, (255, 0, 0), enemy_square_8)
     pygame.draw.rect(screen, (255, 0, 0), enemy_square_9)
     pygame.draw.rect(screen, (255, 0, 0), enemy_square_10)
+    pygame.draw.rect(screen, (255, 0, 0), enemy_square_11)
+    pygame.draw.rect(screen, (255, 0, 0), enemy_square_12)
+    pygame.draw.rect(screen, (255, 0, 0), enemy_square_13)
     pygame.draw.rect(screen, (0, 0, 255), shooty_square_1)
     pygame.draw.rect(screen, (0, 0, 255), shooty_square_2)
     pygame.draw.rect(screen, (0, 0, 255), shooty_square_3)
@@ -65,19 +74,22 @@ def displayer(squarelist):
     pygame.draw.rect(screen, (0, 0, 255), shooty_square_8)
     pygame.draw.rect(screen, (0, 0, 255), shooty_square_9)
     pygame.draw.rect(screen, (0, 0, 255), shooty_square_10)
+    pygame.draw.rect(screen, (0, 0, 255), shooty_square_11)
+    pygame.draw.rect(screen, (0, 0, 255), shooty_square_12)
+    pygame.draw.rect(screen, (0, 0, 255), shooty_square_13)
     
     pygame.display.update()
 
 running = True
 count = 0
 generation = -1
-countyep = 0
+#countyep = 0
 def eval_genomes(genomes, config):
     printed_fitness = 0
-    global countyep, shooty_square_1, shooty_square_2, shooty_square_3, shooty_square_4, shooty_square_5, shooty_square_6, shooty_square_7, shooty_square_8, shooty_square_9, shooty_square_10, generation, enemy_square_1, enemy_square_2, enemy_square_3, enemy_square_4, enemy_square_5, enemy_square_6, enemy_square_7, enemy_square_8, enemy_square_9, enemy_square_10, the_square
+    global countyep, shooty_square_1, shooty_square_2, shooty_square_3, shooty_square_4, shooty_square_5, shooty_square_6, shooty_square_7, shooty_square_8, shooty_square_9, shooty_square_10, shooty_square_11, shooty_square_12, shooty_square_13, generation, enemy_square_1, enemy_square_2, enemy_square_3, enemy_square_4, enemy_square_5, enemy_square_6, enemy_square_7, enemy_square_8, enemy_square_9, enemy_square_10, enemy_square_11, enemy_square_12, enemy_square_13, the_square
     generation += 1
     the_square = pygame.Rect(10, 240, 10, 10)
-    random_list_of_y_coords = random.sample(range(0, 500, 10), 10)
+    random_list_of_y_coords = random.sample(range(0, 500, 10), 13)
     enemy_square_1 = pygame.Rect(480, random_list_of_y_coords[0], 10, 10)
     enemy_square_2 = pygame.Rect(480, random_list_of_y_coords[1], 10, 10)
     enemy_square_3 = pygame.Rect(480, random_list_of_y_coords[2], 10, 10)
@@ -88,6 +100,9 @@ def eval_genomes(genomes, config):
     enemy_square_8 = pygame.Rect(480, random_list_of_y_coords[7], 10, 10)
     enemy_square_9 = pygame.Rect(480, random_list_of_y_coords[8], 10, 10)
     enemy_square_10 = pygame.Rect(480, random_list_of_y_coords[9], 10, 10)
+    enemy_square_11 = pygame.Rect(480, random_list_of_y_coords[10], 10, 10)
+    enemy_square_12 = pygame.Rect(480, random_list_of_y_coords[11], 10, 10)
+    enemy_square_13 = pygame.Rect(480, random_list_of_y_coords[12], 10, 10)
     shooty_square_1 = pygame.Rect(490, random_list_of_y_coords[0], 10, 10)
     shooty_square_2 = pygame.Rect(490, random_list_of_y_coords[1], 10, 10)
     shooty_square_3 = pygame.Rect(490, random_list_of_y_coords[2], 10, 10)
@@ -98,6 +113,9 @@ def eval_genomes(genomes, config):
     shooty_square_8 = pygame.Rect(490, random_list_of_y_coords[7], 10, 10)
     shooty_square_9 = pygame.Rect(490, random_list_of_y_coords[8], 10, 10)
     shooty_square_10 = pygame.Rect(490, random_list_of_y_coords[9], 10, 10)
+    shooty_square_11 = pygame.Rect(490, random_list_of_y_coords[10], 10, 10)
+    shooty_square_12 = pygame.Rect(490, random_list_of_y_coords[11], 10, 10)
+    shooty_square_13 = pygame.Rect(490, random_list_of_y_coords[12], 10, 10)
     the_square_list = []
     genome_list = []
     network_list = []
@@ -109,7 +127,7 @@ def eval_genomes(genomes, config):
         network_list.append(net)
     running = True
     while running == True:
-        clock.tick(120)        
+        clock.tick(300)        
         screen.fill((0,0,0))
         still_alive = myfont.render("Still alive: " + str(len(the_square_list)), False, (255, 255, 255))
         screen.blit(still_alive,(5,0))
@@ -128,10 +146,13 @@ def eval_genomes(genomes, config):
         enemy_square_8 = pygame.Rect.move(enemy_square_8, -5, 0)
         enemy_square_9 = pygame.Rect.move(enemy_square_9, -5, 0)
         enemy_square_10 = pygame.Rect.move(enemy_square_10, -5, 0)
+        enemy_square_11 = pygame.Rect.move(enemy_square_11, -5, 0)
+        enemy_square_12 = pygame.Rect.move(enemy_square_12, -5, 0)
+        enemy_square_13 = pygame.Rect.move(enemy_square_13, -5, 0)
         # If an enemy square hits our green square, the game ends
         for i in range(len(the_square_list) -1, -1, -1):
             square = the_square_list[i]
-            if pygame.Rect.colliderect(square, enemy_square_1) == True or pygame.Rect.colliderect(square, enemy_square_2) == True or pygame.Rect.colliderect(square, enemy_square_3) == True or pygame.Rect.colliderect(square, enemy_square_4) == True or pygame.Rect.colliderect(square, enemy_square_5) == True or pygame.Rect.colliderect(square, enemy_square_6) == True or pygame.Rect.colliderect(square, enemy_square_7) == True or pygame.Rect.colliderect(square, enemy_square_8) == True or pygame.Rect.colliderect(square, enemy_square_9) == True or pygame.Rect.colliderect(square, enemy_square_10) == True:
+            if pygame.Rect.colliderect(square, enemy_square_1) == True or pygame.Rect.colliderect(square, enemy_square_2) == True or pygame.Rect.colliderect(square, enemy_square_3) == True or pygame.Rect.colliderect(square, enemy_square_4) == True or pygame.Rect.colliderect(square, enemy_square_5) == True or pygame.Rect.colliderect(square, enemy_square_6) == True or pygame.Rect.colliderect(square, enemy_square_7) == True or pygame.Rect.colliderect(square, enemy_square_8) == True or pygame.Rect.colliderect(square, enemy_square_9) == True or pygame.Rect.colliderect(square, enemy_square_10) == True or pygame.Rect.colliderect(square, enemy_square_11) == True or pygame.Rect.colliderect(square, enemy_square_12) == True or pygame.Rect.colliderect(square, enemy_square_13) == True:
                 genome_list[i].fitness -= 100.0
                 the_square_list.pop(i)
                 genome_list.pop(i)
@@ -147,7 +168,7 @@ def eval_genomes(genomes, config):
             break
         if enemy_square_1[0] == -20:
             # Red squares reach the other end of the screen, so they all get reset
-            random_list_of_y_coords = random.sample(range(0, 500, 10), 10)
+            random_list_of_y_coords = random.sample(range(0, 500, 10), 13)
             enemy_square_1 = pygame.Rect(480, random_list_of_y_coords[0], 10, 10)
             enemy_square_2 = pygame.Rect(480, random_list_of_y_coords[1], 10, 10)
             enemy_square_3 = pygame.Rect(480, random_list_of_y_coords[2], 10, 10)
@@ -158,6 +179,9 @@ def eval_genomes(genomes, config):
             enemy_square_8 = pygame.Rect(480, random_list_of_y_coords[7], 10, 10)
             enemy_square_9 = pygame.Rect(480, random_list_of_y_coords[8], 10, 10)
             enemy_square_10 = pygame.Rect(480, random_list_of_y_coords[9], 10, 10)
+            enemy_square_11 = pygame.Rect(480, random_list_of_y_coords[10], 10, 10)
+            enemy_square_12 = pygame.Rect(480, random_list_of_y_coords[11], 10, 10)
+            enemy_square_13 = pygame.Rect(480, random_list_of_y_coords[12], 10, 10)
             shooty_square_1 = pygame.Rect(490, random_list_of_y_coords[0], 10, 10)
             shooty_square_2 = pygame.Rect(490, random_list_of_y_coords[1], 10, 10)
             shooty_square_3 = pygame.Rect(490, random_list_of_y_coords[2], 10, 10)
@@ -168,22 +192,30 @@ def eval_genomes(genomes, config):
             shooty_square_8 = pygame.Rect(490, random_list_of_y_coords[7], 10, 10)
             shooty_square_9 = pygame.Rect(490, random_list_of_y_coords[8], 10, 10)
             shooty_square_10 = pygame.Rect(490, random_list_of_y_coords[9], 10, 10)
+            shooty_square_11 = pygame.Rect(490, random_list_of_y_coords[10], 10, 10)
+            shooty_square_12 = pygame.Rect(490, random_list_of_y_coords[11], 10, 10)
+            shooty_square_13 = pygame.Rect(490, random_list_of_y_coords[12], 10, 10)
             printed_fitness += 1
             # It must have survived another round, so the network gets rewarded
             for idx, square in enumerate(the_square_list):
                 genome_list[idx].fitness += 1.0
         for idx, square in enumerate(the_square_list):
+            change_direction = 0
             y = 0
+            if square[1] <= 230:
+                change_direction = -1
+            if square[1] >= 240:
+                change_direction = 1
             try:
                 # If the colour at 490 at the opposite end of the screen from the green square is blue, there's an enemy 
                 if pygame.Surface.get_at(screen, (490, the_square_list[idx][1])) == (0, 0, 255, 255):
-                    countyep += 1
+                    #countyep += 1
                     #print("Yep!" + str(countyep))
                     #print("\n")
                     y = 1
                 # Checks nine pixels down because the green square's bottom can sometimes touch the top of an enemy square
                 if pygame.Surface.get_at(screen, (490, the_square_list[idx][1]+9)) == (0, 0, 255, 255):
-                    countyep += 1
+                    #countyep += 1
                     #print("ADDED 9!" + str(countyep))
                     #print("\n")
                     y = 1
@@ -192,7 +224,7 @@ def eval_genomes(genomes, config):
             except IndexError:
                 #print("Out of range (bottom of screen) = True!")    
                 y = 1      
-            output = network_list[idx].activate((the_square_list[idx][1], y))
+            output = network_list[idx].activate((change_direction, y))
             #print(output)
             max_value = max(output)
             max_index = output.index(max_value)
@@ -221,10 +253,10 @@ def run(config_file):
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
-    p.add_reporter(neat.Checkpointer(50))
+    p.add_reporter(neat.Checkpointer(60))
 
     # Run for up to 300 generations.
-    winner = p.run(eval_genomes, 1)
+    winner = p.run(eval_genomes, 300)
 
     # Display the winning genome.
     # print('\nBest genome:\n{!s}'.format(winner))
