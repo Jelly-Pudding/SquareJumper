@@ -130,11 +130,11 @@ def eval_genomes(genomes, config):
         clock.tick(250)        
         screen.fill((0,0,0))
         still_alive = myfont.render("Still alive: " + str(len(the_square_list)), False, (255, 255, 255))
-        screen.blit(still_alive,(15,0))
+        screen.blit(still_alive,(112,0))
         print_fitness = myfont.render("Fitness: " + str(printed_fitness), False, (255, 255, 255))
-        screen.blit(print_fitness,(105,0))
+        screen.blit(print_fitness,(200,0))
         generation_num = myfont.render("Generation: " + str(generation), False, (255, 255, 255))
-        screen.blit(generation_num,(190,0))
+        screen.blit(generation_num,(15,0))
         displayer(the_square_list)
         enemy_square_1 = pygame.Rect.move(enemy_square_1, -5, 0)  
         enemy_square_2 = pygame.Rect.move(enemy_square_2, -5, 0)
@@ -164,10 +164,14 @@ def eval_genomes(genomes, config):
                 the_square_list.pop(i)
                 genome_list.pop(i)
                 network_list.pop(i)
-            if genome_list[i].fitness == 300:
-                the_square_list.pop(i)
-                genome_list.pop(i)
-                network_list.pop(i)
+            try:
+                if genome_list[i].fitness == 300:
+                    the_square_list.pop(i)
+                    genome_list.pop(i)
+                    network_list.pop(i)
+            # Sometimes an IndexError if the genome has already been popped
+            except IndexError:
+                pass
         if the_square_list == []:
             break
         if enemy_square_1[0] == -20:
@@ -268,7 +272,8 @@ def run(config_file):
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
-    p.add_reporter(neat.Checkpointer(1))
+    # Uncomment if you want to add neat checkpoint files
+    #p.add_reporter(neat.Checkpointer(1))
 
     # Run for up to 300 generations.
     winner = p.run(eval_genomes, 5)
