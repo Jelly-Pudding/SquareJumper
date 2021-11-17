@@ -64,19 +64,19 @@ def displayer(squarelist):
     pygame.draw.rect(screen, (255, 0, 0), enemy_square_11)
     pygame.draw.rect(screen, (255, 0, 0), enemy_square_12)
     pygame.draw.rect(screen, (255, 0, 0), enemy_square_13)
-    pygame.draw.rect(screen, (0, 0, 255), shooty_square_1)
-    pygame.draw.rect(screen, (0, 0, 255), shooty_square_2)
-    pygame.draw.rect(screen, (0, 0, 255), shooty_square_3)
-    pygame.draw.rect(screen, (0, 0, 255), shooty_square_4)
-    pygame.draw.rect(screen, (0, 0, 255), shooty_square_5)
-    pygame.draw.rect(screen, (0, 0, 255), shooty_square_6)
-    pygame.draw.rect(screen, (0, 0, 255), shooty_square_7)
-    pygame.draw.rect(screen, (0, 0, 255), shooty_square_8)
-    pygame.draw.rect(screen, (0, 0, 255), shooty_square_9)
-    pygame.draw.rect(screen, (0, 0, 255), shooty_square_10)
-    pygame.draw.rect(screen, (0, 0, 255), shooty_square_11)
-    pygame.draw.rect(screen, (0, 0, 255), shooty_square_12)
-    pygame.draw.rect(screen, (0, 0, 255), shooty_square_13)
+    pygame.draw.rect(screen, (255,165,0), shooty_square_1)
+    pygame.draw.rect(screen, (255,165,0), shooty_square_2)
+    pygame.draw.rect(screen, (255,165,0), shooty_square_3)
+    pygame.draw.rect(screen, (255,165,0), shooty_square_4)
+    pygame.draw.rect(screen, (255,165,0), shooty_square_5)
+    pygame.draw.rect(screen, (255,165,0), shooty_square_6)
+    pygame.draw.rect(screen, (255,165,0), shooty_square_7)
+    pygame.draw.rect(screen, (255,165,0), shooty_square_8)
+    pygame.draw.rect(screen, (255,165,0), shooty_square_9)
+    pygame.draw.rect(screen, (255,165,0), shooty_square_10)
+    pygame.draw.rect(screen, (255,165,0), shooty_square_11)
+    pygame.draw.rect(screen, (255,165,0), shooty_square_12)
+    pygame.draw.rect(screen, (255,165,0), shooty_square_13)
     
     pygame.display.update()
 
@@ -127,14 +127,14 @@ def eval_genomes(genomes, config):
         network_list.append(net)
     running = True
     while running == True:
-        clock.tick(30)        
+        clock.tick(250)        
         screen.fill((0,0,0))
         still_alive = myfont.render("Still alive: " + str(len(the_square_list)), False, (255, 255, 255))
         screen.blit(still_alive,(15,0))
         print_fitness = myfont.render("Fitness: " + str(printed_fitness), False, (255, 255, 255))
         screen.blit(print_fitness,(105,0))
         generation_num = myfont.render("Generation: " + str(generation), False, (255, 255, 255))
-        screen.blit(generation_num,(160,0))
+        screen.blit(generation_num,(190,0))
         displayer(the_square_list)
         enemy_square_1 = pygame.Rect.move(enemy_square_1, -5, 0)  
         enemy_square_2 = pygame.Rect.move(enemy_square_2, -5, 0)
@@ -161,6 +161,10 @@ def eval_genomes(genomes, config):
             # Forces it to play within the screen
             if square[1] <= 0 or square[1] >= 500:
                 genome_list[i].fitness -= 100.0
+                the_square_list.pop(i)
+                genome_list.pop(i)
+                network_list.pop(i)
+            if genome_list[i].fitness == 300:
                 the_square_list.pop(i)
                 genome_list.pop(i)
                 network_list.pop(i)
@@ -209,7 +213,7 @@ def eval_genomes(genomes, config):
                 the_square_list[idx]["threshold"] = 300
             try:
                 # If the colour at 490 at the opposite end of the screen from the green square is blue, there's an enemy 
-                if pygame.Surface.get_at(screen, (490, the_square_list[idx]["square"][1])) == (0, 0, 255, 255):
+                if pygame.Surface.get_at(screen, (490, the_square_list[idx]["square"][1])) == (255,165,0, 255):
                     if the_square_list[idx]["direction_change"] == True:
                         y = 1
                     elif the_square_list[idx]["direction_change"] == False:
@@ -218,7 +222,7 @@ def eval_genomes(genomes, config):
                     #print("Yep!" + str(countyep))
                     #print("\n")
                 # Checks nine pixels down because the green square's bottom can sometimes touch the top of an enemy square
-                elif pygame.Surface.get_at(screen, (490, the_square_list[idx]["square"][1]+9)) == (0, 0, 255, 255):
+                elif pygame.Surface.get_at(screen, (490, the_square_list[idx]["square"][1]+9)) == (255,165,0, 255):
                     if the_square_list[idx]["direction_change"] == True:
                         y = 1
                     elif the_square_list[idx]["direction_change"] == False:
@@ -227,24 +231,25 @@ def eval_genomes(genomes, config):
             except IndexError:
                 #print("Out of range (bottom of screen) = True!")    
                 pass
+            '''
             if y == 1:
-
                 print("PLUS ONE " + str(y))
                 print(the_square_list[idx]["square"])
             if y == -1:
                 print("NEGGGATTTTIVE ONE" + str(y))
                 print(the_square_list[idx]["square"])
+            '''
             output = network_list[idx].activate(([y]))
             #print(output)
             max_value = max(output)
             max_index = output.index(max_value)
             #print(max_index)
             if max_index == 0:
-                the_square_list[idx]["square"] = pygame.Rect.move(square["square"], 0, -5)
+                the_square_list[idx]["square"] = pygame.Rect.move(square["square"], 0, -1)
             elif max_index == 1:
                 pass
             elif max_index == 2:
-                the_square_list[idx]["square"] = pygame.Rect.move(square["square"], 0, 5)
+                the_square_list[idx]["square"] = pygame.Rect.move(square["square"], 0, 1)
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
@@ -263,10 +268,10 @@ def run(config_file):
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
-    p.add_reporter(neat.Checkpointer(60))
+    p.add_reporter(neat.Checkpointer(1))
 
     # Run for up to 300 generations.
-    winner = p.run(eval_genomes, 100)
+    winner = p.run(eval_genomes, 5)
 
     # Display the winning genome.
     # print('\nBest genome:\n{!s}'.format(winner))
@@ -275,30 +280,9 @@ def run(config_file):
     #winner = p.run(eval_genomes, 10)
     #print('\nBest genome:\n{!s}'.format(winner))
     #return winner
-run(config_path)
 
-'''
-def run_old_checkpoint(config_file):
-      config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
-                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
-                         config_file)
-      p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-996')
-      p.add_reporter(neat.StdOutReporter(True))
-      stats = neat.StatisticsReporter()
-      p.add_reporter(stats)
-      p.add_reporter(neat.Checkpointer(5))
-      winner = p.run(eval_genomes, 250)
-      winner_net = neat.nn.FeedForwardNetwork.create(winner, config)
-      return winner_net
 
-winner_net = run_old_checkpoint(config_path)
+if __name__ == "__main__":
+    run(config_path)
 
-fh = open("network.pkl", 'wb')
-pickle.dump(winner_net, fh)
-fh.close()
 
-fh = open("network.pkl", 'rb')
-bestnetwork = pickle.load(fh)
-fh.close()
-
-'''
