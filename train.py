@@ -130,27 +130,200 @@ def eval_genomes(genomes, config):
         network_list.append(net)
     running = True
     while running == True:
+        printnow = False
         # Time goes faster at higher tick rates. 250 is quite fast, but the network will be able to handle it. 
         clock.tick(250)        
         screen.fill((0,0,0))
+
         # Represents the input node as a green circle
-        for k in config.genome_config.input_keys:
+        
+        for i in config.genome_config.input_keys:
             pygame.draw.circle(screen, (0, 255, 0), (25, 25), 5, 0)
-        # Represents the output nodes as green circles if activated, and red circles if not activated
-        # Lines are also drawn between the input node and all output nodes to represent the connections
-        change_line = 0
-        for idx, cg in enumerate(genome.connections.values()):
-            try:
-                if max_index == idx:
-                    pygame.draw.line(screen,(0, 255, 0),(25,25),(50,10 + change_line),1)
-                    pygame.draw.circle(screen, (0, 255, 0), (50, 10 + change_line), 5, 0)
-                else:
-                    pygame.draw.line(screen,(255, 0, 0),(25,25),(50,10 + change_line),1)
-                    pygame.draw.circle(screen, (255, 0, 0), (50, 10 + change_line), 5, 0)
-            # There is a NameError if max_index has not been defined yet
-            except NameError:
-                continue
-            change_line += 15
+
+        list_of_all_connections = []
+        # Default value for layers. 
+        # input layer and output layer will always be None
+        layer_input = None
+        layer_output = None
+        for cg in genome.connections.values():
+            # Default - it will be the second layer if the first node isn't the input node and the second node is one of the output nodes
+            if cg.key[0] != -1:
+                if cg.key[1] == 0 or cg.key[1] == 1 or cg.key[1] == 2:
+                    layer_input = 2
+                    # If the node has already been connected to from somewhere else, then the layer output value for that connection will be used
+                    for idx in range(len(list_of_all_connections)):
+                        if list_of_all_connections[idx]["second_node"] == cg.key[0]:
+                            layer_input = list_of_all_connections[idx]["layer_output"]
+                    layer_output = None
+            # Default - it will be the second layer if the first node is the input node but the second node is not an output node
+            if cg.key[0] == -1:
+                if cg.key[1] != 0 and cg.key[1] != 1 and cg.key[1] != 2:
+                    layer_input = None
+                    layer_output = 2
+            # This layer will be layer three or higher because the first node isn't the input node and the second node isn't an output node
+            if cg.key[0] != -1 and cg.key[1] != 0 and cg.key[1] != 1 and cg.key[1] != 2:
+                # Check if the input node for this connection was the output node for another connection
+                for idx in range(len(list_of_all_connections)):
+                    if list_of_all_connections[idx]["second_node"] == cg.key[0]:
+                        # Equals none if an output node appears as the first node in the connection 
+                        if list_of_all_connections[idx]["layer_output"] == None:
+                            layer_input = list_of_all_connections[idx]["layer_input"]
+                            layer_output = None
+                            print("it's none!")
+                            print("\n")
+                            print("\n")
+                            print("\n")
+                            print("\n")
+                            print("\n")
+                            print("\n")
+                            print("\n")
+                            print("\n")
+                            print("\n")
+                        elif list_of_all_connections[idx]["layer_output"] != None:
+                            layer_input = list_of_all_connections[idx]["layer_output"]
+                            # Take the layer of what is connecting to this node and add one (because it must be one layer further in the network)
+                            layer_output = list_of_all_connections[idx]["layer_output"] + 1
+            #fixes the reversed order if it does occur (where an output node appears as the first node)
+            if cg.key[0] == 0 or cg.key[0] == 1 or cg.key[0] == 2:
+                list_of_all_connections.append({"first_node": cg.key[1], "second_node": cg.key[0], "weight": cg.weight, "enabled": cg.enabled, "layer_input": layer_input, "layer_output": layer_output})
+                printnow = True             
+            else:
+                list_of_all_connections.append({"first_node": cg.key[0], "second_node": cg.key[1], "weight": cg.weight, "enabled": cg.enabled, "layer_input": layer_input, "layer_output": layer_output})
+
+        if printnow == True:
+            print(list_of_all_connections) 
+
+        # Updates the layer value of nodes to ensure the layer found is always the highest value the node has achieved 
+        for i in range(len(list_of_all_connections)):
+
+            # Deals with the input layer
+            summed = []
+            element = list_of_all_connections[i]["first_node"]
+            if element != -1 and element != 0 and element != 1 and element != 2:
+                for e in range(len(list_of_all_connections)):
+                    if list_of_all_connections[e]["first_node"] == element:
+                        summed.append(list_of_all_connections[e]["layer_input"])
+                    if list_of_all_connections[e]["second_node"] == element:
+                        summed.append(list_of_all_connections[e]["layer_output"])
+                maxxed = max(summed)
+                list_of_all_connections[i]["layer_input"] = maxxed  
+
+            # Deals with the output layer
+
+            summed = []
+            element = list_of_all_connections[i]["second_node"]
+            if element != -1 and element != 0 and element != 1 and element != 2: 
+                for e in range(len(list_of_all_connections)):
+                    if list_of_all_connections[e]["first_node"] == element:
+                        summed.append(list_of_all_connections[e]["layer_input"])
+                    if list_of_all_connections[e]["second_node"] == element:
+                        summed.append(list_of_all_connections[e]["layer_output"])
+                maxxed = max(summed)
+                list_of_all_connections[i]["layer_output"] = maxxed 
+
+        print(list_of_all_connections)
+
+
+
+
+        hidden_connections = []
+        change_line_output = 0
+        push_back_for_hidden_layer = 0
+
+        for dic in list_of_all_connections:
+            # This means there will be nodes in the hidden layer (as either the first node isn't the input node, or the second node isn't one of the output nodes)
+            if dic["first_node"] != -1 or dic["second_node"] != 0 and dic["second_node"] != 1 and dic["second_node"] != 2:
+                push_back_for_hidden_layer = 50
+                hidden_connections.append(dic)
+
+        #print(list_of_all_connections)
+
+        visible_connections = []
+
+        output_0_index = next((index for (index, d) in enumerate(list_of_all_connections) if d["first_node"] == -1 and d["second_node"] == 0), None)
+        if output_0_index != None:
+            visible_connections.append(list_of_all_connections[output_0_index])
+        output_1_index = next((index for (index, d) in enumerate(list_of_all_connections) if d["first_node"] == -1 and d["second_node"] == 1), None)
+        if output_1_index != None:
+            visible_connections.append(list_of_all_connections[output_1_index])
+        output_2_index = next((index for (index, d) in enumerate(list_of_all_connections) if d["first_node"] == -1 and d["second_node"] == 2), None)
+        if output_2_index != None:
+            visible_connections.append(list_of_all_connections[output_2_index])
+
+        output_0_position = 0
+        output_1_position = 1
+        output_2_position = 2
+
+        # deals with the output layers
+        if visible_connections != []:
+            for dic in visible_connections:
+                if dic["enabled"] == True:
+                    if dic["weight"] > 0.7:
+                        pygame.draw.line(screen,(0, 255, 0),(25,25),(50 + push_back_for_hidden_layer, 10 + change_line_output),3)
+                    elif dic["weight"] > 0.5:
+                        pygame.draw.line(screen,(0, 255, 0),(25,25),(50 + push_back_for_hidden_layer, 10 + change_line_output),2)
+                    elif dic["weight"] > 0:
+                        pygame.draw.line(screen,(0, 255, 0),(25,25),(50 + push_back_for_hidden_layer, 10 + change_line_output),1)
+                    elif dic["weight"] < 0:
+                        pygame.draw.line(screen,(255, 0, 0),(25,25),(50 + push_back_for_hidden_layer, 10 + change_line_output),1)
+                pygame.draw.circle(screen, (0, 255, 0), (50 + push_back_for_hidden_layer, 10 + change_line_output), 5, 0)
+                if dic["second_node"] == 0:
+                    output_0_position = (50 + push_back_for_hidden_layer, 10 + change_line_output)
+                elif dic["second_node"] == 1:
+                    output_1_position = (50 + push_back_for_hidden_layer, 10 + change_line_output) 
+                elif dic["second_node"] == 2:
+                    output_2_position = (50 + push_back_for_hidden_layer, 10 + change_line_output)   
+                change_line_output += 15
+
+
+        # deals with connections from the first node to the hidden layer
+
+        change_line_output = 0
+        circle_positions = []
+        if hidden_connections != []:
+            for dic in hidden_connections:
+                change_line_output += 6
+                if dic["first_node"] == -1:
+                    if dic["enabled"] == True:
+                        pygame.draw.line(screen,(0, 255, 0), (25, 25), (80, 10 + change_line_output), 1)
+                    pygame.draw.circle(screen, (0, 255, 0), (80, 10 + change_line_output), 5, 0)
+                    circle_positions.append({"node": dic["second_node"], "position": (80, 10 + change_line_output)})
+
+        # deals with connections between the hidden layer and the output
+
+        if hidden_connections != []:
+            for dic in hidden_connections:
+                if dic["first_node"] != - 1:
+                    if dic["second_node"] == 0:
+                        circle_index = next((index for (index, d) in enumerate(circle_positions) if d["node"] == dic["first_node"]), None)
+                        # Equals none when there's a second hidden layer... for example, node was 4 from circle, and from dic first node 
+                        # it was 8 (8 was in second layer and connected to 0)
+                        if circle_index == None:
+                            #print(circle_positions)
+                            #print(dic["first_node"])
+                            #print(hidden_connections)
+                            pass
+                        the_circle_position = circle_positions[circle_index]["position"]
+                        pygame.draw.line(screen, (0, 255, 0), the_circle_position, output_0_position, 1)
+                    elif dic["second_node"] == 1:
+                        circle_index = next((index for (index, d) in enumerate(circle_positions) if d["node"] == dic["first_node"]), None)
+                        if circle_index == None:
+                            #print(circle_positions)
+                            #print(dic["first_node"])
+                            #print(hidden_connections)
+                            pass
+                        the_circle_position = circle_positions[circle_index]["position"]
+                        pygame.draw.line(screen, (0, 255, 0), the_circle_position, output_1_position, 1)
+                    if dic["second_node"] == 2:
+                        circle_index = next((index for (index, d) in enumerate(circle_positions) if d["node"] == dic["first_node"]), None)
+                        if circle_index == None:
+                            #print(circle_positions)
+                            #print(dic["first_node"])
+                            #print(hidden_connections)
+                            pass
+                        the_circle_position = circle_positions[circle_index]["position"]
+                        pygame.draw.line(screen, (0, 255, 0), the_circle_position, output_2_position, 1)
+
         # Shows the input the network receives
         try:
             y_input = smallfont.render(str(y), False, (255, 255, 255))
@@ -158,20 +331,14 @@ def eval_genomes(genomes, config):
         # There is a NameError if y has not been defined yet
         except NameError:
             pass
-        # Shows what each output node does when activated
-        up = smallfont.render("up", False, (255, 255, 255))
-        screen.blit(up, (60, 2))
-        straight = smallfont.render("stay", False, (255, 255, 255))
-        screen.blit(straight, (60, 19))
-        down = smallfont.render("down", False, (255, 255, 255))
-        screen.blit(down, (60, 35))
+        
         # Displays general information for each generation
         still_alive = myfont.render("Still alive: " + str(len(the_square_list)), False, (255, 255, 255))
-        screen.blit(still_alive,(200,0))
+        screen.blit(still_alive,(200+push_back_for_hidden_layer,0))
         print_fitness = myfont.render("Fitness: " + str(printed_fitness), False, (255, 255, 255))
-        screen.blit(print_fitness,(285,0))
+        screen.blit(print_fitness,(285+push_back_for_hidden_layer,0))
         generation_num = myfont.render("Generation: " + str(generation), False, (255, 255, 255))
-        screen.blit(generation_num,(100,0))
+        screen.blit(generation_num,(100+push_back_for_hidden_layer,0))
         displayer(the_square_list)
         # Moves enemies to the left by five pixels
         enemy_square_1 = pygame.Rect.move(enemy_square_1, -5, 0)  
@@ -311,10 +478,10 @@ def run(config_file):
     #p.add_reporter(neat.Checkpointer(1))
 
     # Run for up to 300 generations.
-    winner = p.run(eval_genomes, 5)
+    winner = p.run(eval_genomes, 20)
 
     # Display the winning genome.
-    # print('\nBest genome:\n{!s}'.format(winner))
+    print('\nBest genome:\n{!s}'.format(winner))
 
     #p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-919')
     #winner = p.run(eval_genomes, 10)
