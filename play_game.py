@@ -1,6 +1,9 @@
-# This is an easier version of the game (runs slower)
+# You can move faster in this version of the game (to help make it easier)
+# Starts slow but the enemy's bullets speed up
 
 from train import * 
+
+laser_sound = pygame.mixer.Sound("gun_sound_effect.mp3")
 
 def display():
     pygame.draw.rect(screen, (0, 255, 0), the_square)
@@ -33,8 +36,13 @@ def display():
     pygame.display.update()
 
 running = True
+sound_for_first_shot = True
+increase_speed = 0
 while running:
-    clock.tick(100)        
+    if sound_for_first_shot == True:
+        pygame.mixer.Sound.play(laser_sound)
+        sound_for_first_shot = False
+    clock.tick(50 + increase_speed)        
     screen.fill((0,0,0))
     display()
     enemy_square_1 = pygame.Rect.move(enemy_square_1, -5, 0)  
@@ -87,6 +95,12 @@ while running:
         shooty_square_11 = pygame.Rect(490, random_list_of_y_coords[10], 10, 10)
         shooty_square_12 = pygame.Rect(490, random_list_of_y_coords[11], 10, 10)
         shooty_square_13 = pygame.Rect(490, random_list_of_y_coords[12], 10, 10)
+        pygame.mixer.Sound.play(laser_sound)
+        # Limits the tick rate at 250 (which is the game's state for neat)
+        if increase_speed == 200:
+            pass
+        else:
+            increase_speed += 5
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_q:
