@@ -5,12 +5,12 @@ import sys
 import random
 import pickle
 
+# Get config file path for neat
+
 local_dir = os.path.dirname(__file__)
 config_path = os.path.join(local_dir, 'config_file_for_neat.txt')
 
 #print(config_path)
-
-random_list_of_y_coords = random.sample(range(0, 500, 20), 13)
 
 pygame.init()
 screen = pygame.display.set_mode((500, 500))
@@ -18,6 +18,8 @@ pygame.font.init()
 myfont = pygame.font.SysFont("arial", 14)
 smallfont = pygame.font.SysFont("arial", 11)
 the_square = pygame.Rect(10, 240, 10, 10)
+# The y position of enemies will be randomised
+random_list_of_y_coords = random.sample(range(0, 500, 20), 13)
 enemy_square_1 = pygame.Rect(480, random_list_of_y_coords[0], 10, 10)
 enemy_square_2 = pygame.Rect(480, random_list_of_y_coords[1], 10, 10)
 enemy_square_3 = pygame.Rect(480, random_list_of_y_coords[2], 10, 10)
@@ -31,6 +33,7 @@ enemy_square_10 = pygame.Rect(480, random_list_of_y_coords[9], 10, 10)
 enemy_square_11 = pygame.Rect(480, random_list_of_y_coords[10], 10, 10)
 enemy_square_12 = pygame.Rect(480, random_list_of_y_coords[11], 10, 10)
 enemy_square_13 = pygame.Rect(480, random_list_of_y_coords[12], 10, 10)
+# The square each respective enemy seemingly comes out of
 shooty_square_1 = pygame.Rect(490, random_list_of_y_coords[0], 10, 10)
 shooty_square_2 = pygame.Rect(490, random_list_of_y_coords[1], 10, 10)
 shooty_square_3 = pygame.Rect(490, random_list_of_y_coords[2], 10, 10)
@@ -49,6 +52,7 @@ pygame.display.set_caption("Square Mover")
 clock = pygame.time.Clock()
 
 def displayer(squarelist):
+    # Draws all the different squares neat controls
     for i, square in enumerate(squarelist):
         pygame.draw.rect(screen, (0, 255, 0), square["square"])
     #pygame.draw.rect(screen, (0, 255, 0), the_square)
@@ -86,9 +90,12 @@ count = 0
 generation = -1
 #countyep = 0
 def eval_genomes(genomes, config):
+    # This will be shown as text in the window
     printed_fitness = 0
     global y, max_index, shooty_square_1, shooty_square_2, shooty_square_3, shooty_square_4, shooty_square_5, shooty_square_6, shooty_square_7, shooty_square_8, shooty_square_9, shooty_square_10, shooty_square_11, shooty_square_12, shooty_square_13, generation, enemy_square_1, enemy_square_2, enemy_square_3, enemy_square_4, enemy_square_5, enemy_square_6, enemy_square_7, enemy_square_8, enemy_square_9, enemy_square_10, enemy_square_11, enemy_square_12, enemy_square_13, the_square
+    # This will also be shown in the window
     generation += 1
+    # Resets the positions of all squares
     the_square = pygame.Rect(10, 240, 10, 10)
     random_list_of_y_coords = random.sample(range(0, 500, 10), 13)
     enemy_square_1 = pygame.Rect(480, random_list_of_y_coords[0], 10, 10)
@@ -124,13 +131,19 @@ def eval_genomes(genomes, config):
     network_list = []
     for genome_id, genome in genomes:
         genome.fitness = 0.0
+        '''
+        direction_change determines whether the input for neat will be a plus or a minus.
+        threshold is currently at an arbitrary value (50). When the green square gets to a certain
+        y coordinate, the threshold value will equal that new y coordinate so that, through a conditional
+        statement, reaching the specified y coordinate does not cause direction_change to change its
+        value multiple times in quick succession.
+        '''
         the_square_list.append({"square": the_square, "direction_change": False, "threshold": 50})
         genome_list.append(genome)
         net = neat.nn.FeedForwardNetwork.create(genome, config)
         network_list.append(net)
     running = True
     while running == True:
-        printnow = False
         # Time goes faster at higher tick rates. 250 is quite fast, but the network will be able to handle it. 
         clock.tick(250)        
         screen.fill((0,0,0))
@@ -145,7 +158,7 @@ def eval_genomes(genomes, config):
             # The input node is -1, and the output nodes are 0, 1 and 2
             if cg.key[0] != -1:
                 if cg.key[1] == 0 or cg.key[1] == 1 or cg.key[1] == 2:
-                    # This is also a default value - it will at least be the second layer if the first node isn't the input node
+                    # This is a default value - it will at least be the second layer if the first node isn't the input node
                     layer_input = 2
                     # If the node has already been connected to from somewhere else, then the layer output value for that connection will be used
                     for idx in range(len(list_of_all_connections)):
@@ -164,7 +177,7 @@ def eval_genomes(genomes, config):
                     if list_of_all_connections[idx]["second_node"] == cg.key[0]:
                         # Equals none if an output node appears as the first node in the connection (which can happen)
                         if list_of_all_connections[idx]["layer_output"] == None:
-                            # Because it has been reversed, default values of 1 will be given. These values will get updated later.  
+                            # Because it has been reversed, default values of 1 will be given. All these default values will get updated shortly.  
                             layer_input = 1
                             layer_output = 1
                         elif list_of_all_connections[idx]["layer_output"] != None:
@@ -177,7 +190,8 @@ def eval_genomes(genomes, config):
             else:
                 list_of_all_connections.append({"first_node": cg.key[0], "second_node": cg.key[1], "weight": cg.weight, "enabled": cg.enabled, "layer_input": layer_input, "layer_output": layer_output})
 
-        # Updates the layer value of nodes to ensure the layer found is always the highest value the node has achieved 
+        # Updates the layer value of nodes to ensure the layer is always the highest value the node achieved in the list
+        # This next iteration also updates all the default values
         for i in range(len(list_of_all_connections)):
             # Deals with the input layer
             summed = []
@@ -210,7 +224,7 @@ def eval_genomes(genomes, config):
                 list_of_all_connections[i]["layer_output"] = None
 
 
-        print(list_of_all_connections)
+        #print(list_of_all_connections)
 
         # Represents the input node as a green circle
         
@@ -243,7 +257,8 @@ def eval_genomes(genomes, config):
                 circle_index_first = next((index for (index, d) in enumerate(circle_positions) if d["node"] == dict["first_node"]), None)
                 if circle_index_first == None:
                     # As the node is not inside circle_positions, it needs to be drawn
-                    # Gets the y value. If there is already another node in this hidden layer, then the new node will be further down (by 15 pixels)
+                    # Gets the y value. If there is already another node in this hidden layer, then the new node will be further down the screen
+                    # (by 15 pixels)
                     if dict["layer_input"] in y_values_for_hidden_nodes.keys():
                         y_values_for_hidden_nodes[dict["layer_input"]] = y_values_for_hidden_nodes[dict["layer_input"]] + 15
                     # If it isn't in the dictionary, then this is the first node in the hidden layer and its value needs to be set
@@ -339,6 +354,7 @@ def eval_genomes(genomes, config):
             # There is sometimes an IndexError if the genome has already been popped
             except IndexError:
                 pass
+        # All the squares are dead, so the while loop ends
         if the_square_list == []:
             break
         if enemy_square_1[0] == -20:
@@ -439,7 +455,7 @@ def run(config_file):
     # Uncomment if you want to add neat checkpoint files
     #p.add_reporter(neat.Checkpointer(1))
 
-    # Run for up to 300 generations.
+    # Run for up to however many generations.
     winner = p.run(eval_genomes, 20)
 
     # Display the winning genome.
