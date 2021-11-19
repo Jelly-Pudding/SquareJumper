@@ -165,9 +165,11 @@ def eval_genomes(genomes, config):
                 # Check if the input node for this connection was the output node for another connection
                 for idx in range(len(list_of_all_connections)):
                     if list_of_all_connections[idx]["second_node"] == cg.key[0]:
-                        # Equals none if an output node appears as the first node in the connection 
+                        # Equals none if an output node appears as the first node in the connection (which can happen)
                         if list_of_all_connections[idx]["layer_output"] == None:
-                            layer_input = list_of_all_connections[idx]["layer_input"]
+                            # Because it has been reversed, a default value of 1 will be given. This value will get updated later.  
+                            layer_input = 1
+                            # Output equals None as it must be an output node
                             layer_output = None
                             print("it's none!")
                             print("\n")
@@ -195,7 +197,6 @@ def eval_genomes(genomes, config):
 
         # Updates the layer value of nodes to ensure the layer found is always the highest value the node has achieved 
         for i in range(len(list_of_all_connections)):
-
             # Deals with the input layer
             summed = []
             element = list_of_all_connections[i]["first_node"]
@@ -205,11 +206,18 @@ def eval_genomes(genomes, config):
                         summed.append(list_of_all_connections[e]["layer_input"])
                     if list_of_all_connections[e]["second_node"] == element:
                         summed.append(list_of_all_connections[e]["layer_output"])
+                try:
+                    maxxed = max(summed)
+                    list_of_all_connections[i]["layer_input"] = maxxed
+                except Exception as e:
+                    print(e)
+                    print(list_of_all_connections)
+                    print(element)
                 maxxed = max(summed)
-                list_of_all_connections[i]["layer_input"] = maxxed  
-
+                list_of_all_connections[i]["layer_input"] = maxxed
+            elif element == -1 or element == 0 or element == 1 or element == 2:
+                list_of_all_connections[i]["layer_input"] = None
             # Deals with the output layer
-
             summed = []
             element = list_of_all_connections[i]["second_node"]
             if element != -1 and element != 0 and element != 1 and element != 2: 
@@ -218,9 +226,19 @@ def eval_genomes(genomes, config):
                         summed.append(list_of_all_connections[e]["layer_input"])
                     if list_of_all_connections[e]["second_node"] == element:
                         summed.append(list_of_all_connections[e]["layer_output"])
+                try:
+                    maxxed = max(summed)
+                    list_of_all_connections[i]["layer_output"] = maxxed
+                except Exception as e:
+                    print(e)
+                    print(list_of_all_connections)
+                    print(element)
                 maxxed = max(summed)
-                list_of_all_connections[i]["layer_output"] = maxxed 
-
+                list_of_all_connections[i]["layer_output"] = maxxed
+            elif element == -1 or element == 0 or element == 1 or element == 2:
+                list_of_all_connections[i]["layer_output"] = None
+               
+                
         print(list_of_all_connections)
 
 
