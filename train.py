@@ -135,27 +135,25 @@ def eval_genomes(genomes, config):
         clock.tick(250)        
         screen.fill((0,0,0))
 
-        # Represents the input node as a green circle
-        
-        for i in config.genome_config.input_keys:
-            pygame.draw.circle(screen, (0, 255, 0), (25, 25), 5, 0)
-
+        # This will be a list of dictionaries which will each contain information about the connection between two nodes such as
+        # the name of each node and their position within the network 
         list_of_all_connections = []
         # Default value for layers. 
-        # input layer and output layer will always be None
+        # Input layer and output layer will always be None
         layer_input = None
         layer_output = None
         for cg in genome.connections.values():
-            # Default - it will be the second layer if the first node isn't the input node and the second node is one of the output nodes
+            # The input node is -1, and the output nodes are 0, 1 and 2
             if cg.key[0] != -1:
                 if cg.key[1] == 0 or cg.key[1] == 1 or cg.key[1] == 2:
+                    # This is also a default value - it will at least be the second layer if the first node isn't the input node
                     layer_input = 2
                     # If the node has already been connected to from somewhere else, then the layer output value for that connection will be used
                     for idx in range(len(list_of_all_connections)):
                         if list_of_all_connections[idx]["second_node"] == cg.key[0]:
                             layer_input = list_of_all_connections[idx]["layer_output"]
                     layer_output = None
-            # Default - it will be the second layer if the first node is the input node but the second node is not an output node
+            # Default value - it will at the least be the second layer if the the second node is not an output node 
             if cg.key[0] == -1:
                 if cg.key[1] != 0 and cg.key[1] != 1 and cg.key[1] != 2:
                     layer_input = None
@@ -171,29 +169,15 @@ def eval_genomes(genomes, config):
                             layer_input = 1
                             # Output equals None as it must be an output node
                             layer_output = None
-                            print("it's none!")
-                            print("\n")
-                            print("\n")
-                            print("\n")
-                            print("\n")
-                            print("\n")
-                            print("\n")
-                            print("\n")
-                            print("\n")
-                            print("\n")
                         elif list_of_all_connections[idx]["layer_output"] != None:
                             layer_input = list_of_all_connections[idx]["layer_output"]
-                            # Take the layer of what is connecting to this node and add one (because it must be one layer further in the network)
+                            # Takes the layer of what is connecting to this node and adds one (because this node must be one layer further in the network)
                             layer_output = list_of_all_connections[idx]["layer_output"] + 1
             #fixes the reversed order if it does occur (where an output node appears as the first node)
             if cg.key[0] == 0 or cg.key[0] == 1 or cg.key[0] == 2:
-                list_of_all_connections.append({"first_node": cg.key[1], "second_node": cg.key[0], "weight": cg.weight, "enabled": cg.enabled, "layer_input": layer_input, "layer_output": layer_output})
-                printnow = True             
+                list_of_all_connections.append({"first_node": cg.key[1], "second_node": cg.key[0], "weight": cg.weight, "enabled": cg.enabled, "layer_input": layer_input, "layer_output": layer_output})             
             else:
                 list_of_all_connections.append({"first_node": cg.key[0], "second_node": cg.key[1], "weight": cg.weight, "enabled": cg.enabled, "layer_input": layer_input, "layer_output": layer_output})
-
-        if printnow == True:
-            print(list_of_all_connections) 
 
         # Updates the layer value of nodes to ensure the layer found is always the highest value the node has achieved 
         for i in range(len(list_of_all_connections)):
@@ -206,18 +190,14 @@ def eval_genomes(genomes, config):
                         summed.append(list_of_all_connections[e]["layer_input"])
                     if list_of_all_connections[e]["second_node"] == element:
                         summed.append(list_of_all_connections[e]["layer_output"])
-                try:
-                    maxxed = max(summed)
-                    list_of_all_connections[i]["layer_input"] = maxxed
-                except Exception as e:
-                    print(e)
-                    print(list_of_all_connections)
-                    print(element)
                 maxxed = max(summed)
                 list_of_all_connections[i]["layer_input"] = maxxed
+            # Ensures the layers for input and output nodes will always equal None
             elif element == -1 or element == 0 or element == 1 or element == 2:
                 list_of_all_connections[i]["layer_input"] = None
+
             # Deals with the output layer
+
             summed = []
             element = list_of_all_connections[i]["second_node"]
             if element != -1 and element != 0 and element != 1 and element != 2: 
@@ -226,52 +206,96 @@ def eval_genomes(genomes, config):
                         summed.append(list_of_all_connections[e]["layer_input"])
                     if list_of_all_connections[e]["second_node"] == element:
                         summed.append(list_of_all_connections[e]["layer_output"])
-                try:
-                    maxxed = max(summed)
-                    list_of_all_connections[i]["layer_output"] = maxxed
-                except Exception as e:
-                    print(e)
-                    print(list_of_all_connections)
-                    print(element)
                 maxxed = max(summed)
                 list_of_all_connections[i]["layer_output"] = maxxed
             elif element == -1 or element == 0 or element == 1 or element == 2:
                 list_of_all_connections[i]["layer_output"] = None
-               
-                
+
+
         print(list_of_all_connections)
 
+        # Represents the input node as a green circle
+        
+        for i in config.genome_config.input_keys:
+            pygame.draw.circle(screen, (0, 255, 0), (25, 25), 5, 0)
+
+        # Represents the output nodes as green circles. Their x position depends on whether there are nodes in the hidden layer.
+
+        pygame.draw.circle(screen, (0, 255, 0), (150, 10), 5, 0)
+        pygame.draw.circle(screen, (0, 255, 0), (150, 25), 5, 0)
+        pygame.draw.circle(screen, (0, 255, 0), (150, 40), 5, 0)
+
+        # A list of dictionaries that contain the position on the screen for each node. Because the input and output nodes will always have
+        # the same position, these will be added now 
+
+        circle_positions = [{"node": -1, "position": (25, 25)}, {"node": 0, "position": (150, 10)}, {"node": 1, "position": (150, 25)}, {"node": 2, "position": (150, 40)}]
+
+        # This dictionary will ensure nodes in the hidden layer are spaced out evenly
+        y_values_for_hidden_nodes = {}
+
+        # Draws the lines between all the nodes and draws the nodes as circles if they have not been added yet
+
+        for dict in list_of_all_connections:
+            first_null = False
+            second_null = False
+            # First check if the connection is enabled between these nodes
+            if dict["enabled"] == True:
+                # Checks if the first node is in the circle_positions list. If it is, this variable will provide its index. If not,
+                # then the default value of None will be given.
+                circle_index_first = next((index for (index, d) in enumerate(circle_positions) if d["node"] == dict["first_node"]), None)
+                if circle_index_first == None:
+                    # As the node is not inside circle_positions, it needs to be drawn
+                    # Gets the y value. If there is already another node in this hidden layer, then the new node will be further down (by 15 pixels)
+                    if dict["layer_input"] in y_values_for_hidden_nodes.keys():
+                        y_values_for_hidden_nodes[dict["layer_input"]] = y_values_for_hidden_nodes[dict["layer_input"]] + 15
+                    # If it isn't in the dictionary, then this is the first node in the hidden layer and its value needs to be set
+                    else:
+                        y_values_for_hidden_nodes[dict["layer_input"]] = 14
+                    pygame.draw.circle(screen, (0, 255, 0), (dict["layer_input"] * 30, y_values_for_hidden_nodes[dict["layer_input"]]), 5, 0)
+                    # Now that the circle has been drawn, it needs to be added to the circle_positions list
+                    circle_positions.append({"node": dict["first_node"], "position": (dict["layer_input"] * 30, y_values_for_hidden_nodes[dict["layer_input"]])})
+                    # This will avoid having to iterate over the circle_positions list again
+                    first_null = True
+                    the_first_position = (dict["layer_input"] * 30, y_values_for_hidden_nodes[dict["layer_input"]])
+
+                # Second circle will be dealt with similarly     
+
+                circle_index_second = next((index for (index, d) in enumerate(circle_positions) if d["node"] == dict["second_node"]), None)
+                if circle_index_second == None:
+                    if dict["layer_output"] in y_values_for_hidden_nodes.keys():
+                        y_values_for_hidden_nodes[dict["layer_output"]] = y_values_for_hidden_nodes[dict["layer_output"]] + 15
+                    else:
+                        y_values_for_hidden_nodes[dict["layer_output"]] = 14
+                    pygame.draw.circle(screen, (0, 255, 0), (dict["layer_output"] * 30, y_values_for_hidden_nodes[dict["layer_output"]]), 5, 0)
+                    circle_positions.append({"node": dict["second_node"], "position": (dict["layer_output"] * 30, y_values_for_hidden_nodes[dict["layer_output"]])})
+                    second_null = True
+                    the_second_position = (dict["layer_output"] * 30, y_values_for_hidden_nodes[dict["layer_output"]])
+                if first_null == True:
+                    position_one = the_first_position
+                elif first_null == False:   
+                    position_one = circle_positions[circle_index_first]["position"]
+                if second_null == True:
+                    position_two = the_second_position
+                elif second_null == False:
+                    position_two = circle_positions[circle_index_second]["position"]
+                
+                # Draws the lines between the nodes. The thickness (and colour) of the line depends upon the strength of the connection
+
+                if dict["weight"] > 0.7:
+                    pygame.draw.line(screen, (0, 255, 0), (position_one), (position_two), 3)
+                elif dict["weight"] > 0.5:
+                    pygame.draw.line(screen, (0, 255, 0), (position_one), (position_two), 2)
+                elif dict["weight"] > 0:
+                    pygame.draw.line(screen, (0, 255, 0), (position_one), (position_two), 1)
+                elif dict["weight"] < 0:
+                    pygame.draw.line(screen, (255, 0, 0), (position_one), (position_two), 1)
 
 
 
-        hidden_connections = []
+
+
+        '''
         change_line_output = 0
-        push_back_for_hidden_layer = 0
-
-        for dic in list_of_all_connections:
-            # This means there will be nodes in the hidden layer (as either the first node isn't the input node, or the second node isn't one of the output nodes)
-            if dic["first_node"] != -1 or dic["second_node"] != 0 and dic["second_node"] != 1 and dic["second_node"] != 2:
-                push_back_for_hidden_layer = 50
-                hidden_connections.append(dic)
-
-        #print(list_of_all_connections)
-
-        visible_connections = []
-
-        output_0_index = next((index for (index, d) in enumerate(list_of_all_connections) if d["first_node"] == -1 and d["second_node"] == 0), None)
-        if output_0_index != None:
-            visible_connections.append(list_of_all_connections[output_0_index])
-        output_1_index = next((index for (index, d) in enumerate(list_of_all_connections) if d["first_node"] == -1 and d["second_node"] == 1), None)
-        if output_1_index != None:
-            visible_connections.append(list_of_all_connections[output_1_index])
-        output_2_index = next((index for (index, d) in enumerate(list_of_all_connections) if d["first_node"] == -1 and d["second_node"] == 2), None)
-        if output_2_index != None:
-            visible_connections.append(list_of_all_connections[output_2_index])
-
-        output_0_position = 0
-        output_1_position = 1
-        output_2_position = 2
-
         # deals with the output layers
         if visible_connections != []:
             for dic in visible_connections:
@@ -341,7 +365,7 @@ def eval_genomes(genomes, config):
                             pass
                         the_circle_position = circle_positions[circle_index]["position"]
                         pygame.draw.line(screen, (0, 255, 0), the_circle_position, output_2_position, 1)
-
+        '''
         # Shows the input the network receives
         try:
             y_input = smallfont.render(str(y), False, (255, 255, 255))
@@ -352,11 +376,11 @@ def eval_genomes(genomes, config):
         
         # Displays general information for each generation
         still_alive = myfont.render("Still alive: " + str(len(the_square_list)), False, (255, 255, 255))
-        screen.blit(still_alive,(200+push_back_for_hidden_layer,0))
+        screen.blit(still_alive,(270,0))
         print_fitness = myfont.render("Fitness: " + str(printed_fitness), False, (255, 255, 255))
-        screen.blit(print_fitness,(285+push_back_for_hidden_layer,0))
+        screen.blit(print_fitness,(355,0))
         generation_num = myfont.render("Generation: " + str(generation), False, (255, 255, 255))
-        screen.blit(generation_num,(100+push_back_for_hidden_layer,0))
+        screen.blit(generation_num,(170,0))
         displayer(the_square_list)
         # Moves enemies to the left by five pixels
         enemy_square_1 = pygame.Rect.move(enemy_square_1, -5, 0)  
